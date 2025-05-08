@@ -1,7 +1,7 @@
 package applicationPostComment
 
 import (
-	"DDD/domain"
+	"DDD/src/domain"
 	"context"
 )
 

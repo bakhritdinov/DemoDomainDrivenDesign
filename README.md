@@ -38,3 +38,8 @@ or
 ```bash
 go run ./main.go
 ```
+
+Generate swagger docs
+```bash
+swag init
+```

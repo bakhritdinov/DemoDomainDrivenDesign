@@ -1,13 +1,15 @@
 package main
 
 import (
-	appPost "DDD/application/post"
-	appComment "DDD/application/post_comment"
-	httpCommentV1 "DDD/infrastructure/http/v1/comment"
-	httpPostV1 "DDD/infrastructure/http/v1/post"
-	"DDD/infrastructure/persistence"
-	"DDD/infrastructure/persistence/validators"
-	"DDD/infrastructure/repository"
+	appPost "DDD/src/application/post"
+	appComment "DDD/src/application/post_comment"
+	"DDD/src/infrastructure/http/v1/comment"
+	"DDD/src/infrastructure/http/v1/post"
+	"DDD/src/infrastructure/persistence"
+	"DDD/src/infrastructure/persistence/validators"
+	"DDD/src/infrastructure/repository"
+	"fmt"
+	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -44,9 +46,6 @@ func main() {
 	// Health check
 	app.Use(healthcheck.New())
 
-	// Metrics
-	app.Get("/metrics", monitor.New())
-
 	// Validators
 	validators.InitValidator("en")
 	validators.RegisterValidationCallbacks(db)
@@ -64,5 +63,31 @@ func main() {
 	httpPostV1.SetupRoutes(app, postService)
 	httpCommentV1.SetupRoutes(app, commentService)
 
+	// Init dev tools
+	initDevTools(app)
+
 	log.Fatal(app.Listen(":" + os.Getenv("APP_PORT")))
+}
+
+func initDevTools(app *fiber.App) {
+	if os.Getenv("APP_ENV") == "development" {
+		// Register Swagger route
+		app.Get("/docs/*", swagger.New(swagger.Config{
+			BasePath: "/",
+			FilePath: "./docs/swagger.json", // Path to your OpenAPI/Swagger JSON
+			Path:     "/docs",               // URL at which Swagger will be available
+			Title:    os.Getenv("APP_NAME"),
+		}))
+
+		// Metrics
+		app.Get("/metrics", monitor.New())
+
+		// Get all registered routes
+		routes := app.GetRoutes()
+
+		// Print all routes
+		for _, route := range routes {
+			fmt.Printf("Method: %s, Path: %s\n", route.Method, route.Path)
+		}
+	}
 }

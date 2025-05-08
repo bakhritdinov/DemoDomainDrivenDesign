@@ -1,7 +1,7 @@
 package httpPostV1
 
 import (
-	applicationPost "DDD/application/post"
+	"DDD/src/application/post"
 	"github.com/gofiber/fiber/v2"
 )
 

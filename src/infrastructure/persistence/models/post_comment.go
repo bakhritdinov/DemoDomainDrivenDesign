@@ -1,7 +1,7 @@
 package models
 
 import (
-	"DDD/domain"
+	"DDD/src/domain"
 	"gorm.io/gorm"
 )
 

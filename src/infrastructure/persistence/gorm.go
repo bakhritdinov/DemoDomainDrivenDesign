@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"DDD/infrastructure/persistence/migrations"
+	"DDD/src/infrastructure/persistence/migrations"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

@@ -6,13 +6,13 @@ import (
 )
 
 type Post struct {
-	Id        uint          `json:"id"`
-	Title     string        `json:"title"`
-	Content   string        `json:"content"`
-	Comments  []PostComment `json:"comments,omitempty"`
-	CreatedAt time.Time     `json:"createdAt"`
-	UpdatedAt time.Time     `json:"updatedAt"`
-	DeletedAt *time.Time    `json:"deletedAt"`
+	Id        uint
+	Title     string
+	Content   string
+	Comments  []PostComment `json:"-"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 type PostRepository interface {

@@ -1,7 +1,7 @@
 package applicationPost
 
 import (
-	"DDD/domain"
+	"DDD/src/domain"
 	"context"
 )
 

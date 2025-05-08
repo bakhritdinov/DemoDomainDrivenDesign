@@ -1,7 +1,7 @@
 package models
 
 import (
-	"DDD/domain"
+	"DDD/src/domain"
 	"gorm.io/gorm"
 )
 
@@ -9,7 +9,7 @@ type PostTable struct {
 	gorm.Model
 	Title    string             `gorm:"size:255;not null" validate:"required,min=3,max=100"`
 	Content  string             `gorm:"type:text" validate:"required,max=500"`
-	Comments []PostCommentTable `gorm:"foreignKey:PostId;constraint:OnDelete:CASCADE" validate:"dive"`
+	Comments []PostCommentTable `gorm:"foreignKey:PostId;constraint:OnDelete:CASCADE"`
 }
 
 func (PostTable) TableName() string {

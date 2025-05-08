@@ -6,12 +6,12 @@ import (
 )
 
 type PostComment struct {
-	Id        uint       `json:"id"`
-	PostId    uint       `json:"postId"`
-	Text      string     `json:"text"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+	Id        uint
+	PostId    uint
+	Text      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 type PostCommentRepository interface {

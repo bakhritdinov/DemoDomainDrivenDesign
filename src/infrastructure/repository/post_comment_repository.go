@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"DDD/domain"
-	"DDD/infrastructure/persistence/models"
+	"DDD/src/domain"
+	"DDD/src/infrastructure/persistence/models"
 	"context"
 	"errors"
 	"gorm.io/gorm"

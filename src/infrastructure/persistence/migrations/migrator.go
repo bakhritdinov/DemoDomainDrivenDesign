@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"DDD/infrastructure/persistence/models"
+	"DDD/src/infrastructure/persistence/models"
 	"gorm.io/gorm"
 )
 

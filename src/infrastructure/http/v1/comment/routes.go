@@ -1,7 +1,7 @@
 package httpCommentV1
 
 import (
-	applicationComment "DDD/application/post_comment"
+	applicationComment "DDD/src/application/post_comment"
 	"github.com/gofiber/fiber/v2"
 )
 

@@ -13,7 +13,7 @@ import (
 )
 
 type CreatePostCommentRequest struct {
-	Text string `json:"text" validate:"required,min=3,max=100" example:"Great post"`
+	Text string `json:"text" example:"Great post"`
 }
 
 type PostCommentResponse struct {
@@ -112,8 +112,8 @@ func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 	}
 
 	req := CreatePostCommentRequest{}
-	if err := c.BodyParser(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid post comment data"})
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	comment, err := h.Service.CreatePostComment(c.Context(), domain.PostComment{

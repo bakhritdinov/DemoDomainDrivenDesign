@@ -13,13 +13,13 @@ import (
 )
 
 type CreatePostRequest struct {
-	Title   string `json:"title" validate:"required,min=3,max=100" example:"My Post Title"`
-	Content string `json:"content" validate:"required,max=500" example:"Post content here"`
+	Title   string `json:"title" example:"My Post Title"`
+	Content string `json:"content" example:"Post content here"`
 }
 
 type UpdatePostRequest struct {
-	Title   string `json:"title" validate:"min=3,max=100" example:"My Post Title"`
-	Content string `json:"content" validate:"max=500" example:"Post content here"`
+	Title   string `json:"title" example:"My Post Title"`
+	Content string `json:"content" example:"Post content here"`
 }
 
 type PostResponse struct {
@@ -108,8 +108,8 @@ func (h *Handler) Paginate(c *fiber.Ctx) error {
 // @Router /v1/posts [post]
 func (h *Handler) CreatePost(c *fiber.Ctx) error {
 	req := CreatePostRequest{}
-	if err := c.BodyParser(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid post data"})
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	postData := domain.Post{
@@ -157,7 +157,7 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 	}
 
 	req := UpdatePostRequest{}
-	if err := c.BodyParser(req); err != nil {
+	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 

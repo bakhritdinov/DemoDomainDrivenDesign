@@ -3,6 +3,7 @@ package httpCommentV1
 import (
 	applicationComment "DDD/src/application/post_comment"
 	"DDD/src/domain"
+	"DDD/src/infrastructure/http"
 	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -17,11 +18,12 @@ type CreatePostCommentRequest struct {
 }
 
 type PostCommentResponse struct {
-	ID        uint      `json:"id" example:"1"`
-	Text      string    `json:"text" example:"Great post"`
-	PostId    uint      `json:"postId" example:"1"`
-	CreatedAt time.Time `json:"createdAt" swaggertype:"string" format:"date-time"`
-	UpdatedAt time.Time `json:"updatedAt" swaggertype:"string" format:"date-time"`
+	ID        uint       `json:"id" example:"1"`
+	Text      string     `json:"text" example:"Great post"`
+	PostId    uint       `json:"postId" example:"1"`
+	CreatedAt time.Time  `json:"createdAt" swaggertype:"string" format:"date-time"`
+	UpdatedAt time.Time  `json:"updatedAt" swaggertype:"string" format:"date-time"`
+	DeletedAt *time.Time `json:"deletedAt" swaggertype:"string" format:"date-time"`
 }
 
 type Handler struct {
@@ -34,6 +36,7 @@ type Handler struct {
 // @Tags comments
 // @Accept json
 // @Produce json
+// @Param id path int true "post comment id"
 // @Success 201 {object} PostCommentResponse
 // @Failure 400 {string} error
 // @Router /v1/comments/{id} [get]
@@ -56,6 +59,7 @@ func (h *Handler) FindComment(c *fiber.Ctx) error {
 		PostId:    comment.PostId,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,
+		DeletedAt: comment.DeletedAt,
 	})
 }
 
@@ -65,9 +69,10 @@ func (h *Handler) FindComment(c *fiber.Ctx) error {
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Param page path int false "page, default 1"
-// @Param per_page path int false "per_page, default 10"
-// @Success 200 {object} applicationPostComment.PaginatedComments
+// @Param postId path int true "post id"
+// @Param page query int false "page number" default(1)
+// @Param per_page query int false "per page number" default(10)
+// @Success 200 {object} http.PaginateResponse[domain.PostComment]
 // @Failure 400 {string} error
 // @Router /v1/posts/{postId}/comments [get]
 func (h *Handler) Paginate(c *fiber.Ctx) error {
@@ -84,13 +89,13 @@ func (h *Handler) Paginate(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal server error"})
 	}
 
-	return c.JSON(fiber.Map{
-		"data": result.Comments,
-		"pagination": fiber.Map{
-			"page":        result.Page,
-			"per_page":    result.PerPage,
-			"total_items": result.TotalCount,
-			"total_pages": int(math.Ceil(float64(result.TotalCount) / float64(result.PerPage))),
+	return c.JSON(http.PaginateResponse[domain.PostComment]{
+		Data: result.Comments,
+		Pagination: http.Pagination{
+			Page:       page,
+			PerPage:    perPage,
+			TotalItems: result.TotalCount,
+			TotalPages: int(math.Ceil(float64(result.TotalCount) / float64(result.PerPage))),
 		},
 	})
 }
@@ -131,5 +136,6 @@ func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 		PostId:    comment.PostId,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,
+		DeletedAt: comment.DeletedAt,
 	})
 }

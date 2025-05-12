@@ -3,6 +3,7 @@ package httpPostV1
 import (
 	"DDD/src/application/post"
 	"DDD/src/domain"
+	"DDD/src/infrastructure/http"
 	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -23,11 +24,12 @@ type UpdatePostRequest struct {
 }
 
 type PostResponse struct {
-	ID        uint      `json:"id" example:"1"`
-	Title     string    `json:"title" example:"My Post Title"`
-	Content   string    `json:"content" example:"Post content here"`
-	CreatedAt time.Time `json:"createdAt" swaggertype:"string" format:"date-time"`
-	UpdatedAt time.Time `json:"updatedAt" swaggertype:"string" format:"date-time"`
+	ID        uint       `json:"id" example:"1"`
+	Title     string     `json:"title" example:"My Post Title"`
+	Content   string     `json:"content" example:"Post content here"`
+	CreatedAt time.Time  `json:"createdAt" swaggertype:"string" format:"date-time"`
+	UpdatedAt time.Time  `json:"updatedAt" swaggertype:"string" format:"date-time"`
+	DeletedAt *time.Time `json:"deletedAt" swaggertype:"string" format:"date-time"`
 }
 
 type Handler struct {
@@ -40,6 +42,7 @@ type Handler struct {
 // @Tags posts
 // @Accept json
 // @Produce json
+// @Param id path int true "post id"
 // @Success 201 {object} PostResponse
 // @Failure 400 {string} error
 // @Router /v1/posts/{id} [get]
@@ -62,6 +65,7 @@ func (h *Handler) FindPost(c *fiber.Ctx) error {
 		Content:   post.Content,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
+		DeletedAt: post.DeletedAt,
 	})
 }
 
@@ -71,9 +75,9 @@ func (h *Handler) FindPost(c *fiber.Ctx) error {
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Param page path int false "page, default 1"
-// @Param per_page path int false "per_page, default 10"
-// @Success 200 {object} applicationPost.PaginatedPosts
+// @Param page query int false "page number" default(1)
+// @Param per_page query int false "per page number" default(10)
+// @Success 200 {object} http.PaginateResponse[domain.Post]
 // @Failure 400 {string} error
 // @Router /v1/posts [get]
 func (h *Handler) Paginate(c *fiber.Ctx) error {
@@ -85,13 +89,13 @@ func (h *Handler) Paginate(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Internal server error"})
 	}
 
-	return c.JSON(fiber.Map{
-		"data": result.Posts,
-		"pagination": fiber.Map{
-			"page":        result.Page,
-			"per_page":    result.PerPage,
-			"total_items": result.TotalCount,
-			"total_pages": int(math.Ceil(float64(result.TotalCount) / float64(result.PerPage))),
+	return c.JSON(http.PaginateResponse[domain.Post]{
+		Data: result.Posts,
+		Pagination: http.Pagination{
+			Page:       page,
+			PerPage:    perPage,
+			TotalItems: result.TotalCount,
+			TotalPages: int(math.Ceil(float64(result.TotalCount) / float64(result.PerPage))),
 		},
 	})
 }
@@ -131,6 +135,7 @@ func (h *Handler) CreatePost(c *fiber.Ctx) error {
 		Content:   post.Content,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
+		DeletedAt: post.DeletedAt,
 	})
 }
 
@@ -178,6 +183,7 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 		Content:   post.Content,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
+		DeletedAt: post.DeletedAt,
 	})
 }
 

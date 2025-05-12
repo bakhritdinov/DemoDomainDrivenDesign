@@ -20,6 +20,10 @@ import (
 	"os"
 )
 
+// @title Fiber Swagger
+// @version 1.0
+// @description Demo Domain driven design project.
+// @BasePath /api
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -74,8 +78,8 @@ func initDevTools(app *fiber.App) {
 		// Register Swagger route
 		app.Get("/docs/*", swagger.New(swagger.Config{
 			BasePath: "/",
-			FilePath: "./docs/swagger.json", // Path to your OpenAPI/Swagger JSON
-			Path:     "/docs",               // URL at which Swagger will be available
+			FilePath: "./docs/swagger.json",
+			Path:     "/docs",
 			Title:    os.Getenv("APP_NAME"),
 		}))
 

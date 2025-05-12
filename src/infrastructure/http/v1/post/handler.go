@@ -3,6 +3,7 @@ package httpPostV1
 import (
 	"DDD/src/application/post"
 	"DDD/src/domain"
+	"DDD/src/domain/value_object"
 	"DDD/src/infrastructure/http"
 	"errors"
 	"fmt"
@@ -14,18 +15,18 @@ import (
 )
 
 type CreatePostRequest struct {
-	Title   string `json:"title" example:"My Post Title"`
+	Title   string `json:"title" example:"My post Title"`
 	Content string `json:"content" example:"Post content here"`
 }
 
 type UpdatePostRequest struct {
-	Title   string `json:"title" example:"My Post Title"`
+	Title   string `json:"title" example:"My post Title"`
 	Content string `json:"content" example:"Post content here"`
 }
 
 type PostResponse struct {
 	ID        uint       `json:"id" example:"1"`
-	Title     string     `json:"title" example:"My Post Title"`
+	Title     string     `json:"title" example:"My post Title"`
 	Content   string     `json:"content" example:"Post content here"`
 	CreatedAt time.Time  `json:"createdAt" swaggertype:"string" format:"date-time"`
 	UpdatedAt time.Time  `json:"updatedAt" swaggertype:"string" format:"date-time"`
@@ -61,8 +62,8 @@ func (h *Handler) FindPost(c *fiber.Ctx) error {
 
 	return c.JSON(PostResponse{
 		ID:        post.Id,
-		Title:     post.Title,
-		Content:   post.Content,
+		Title:     post.Title.Value,
+		Content:   post.Content.Value,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		DeletedAt: post.DeletedAt,
@@ -116,9 +117,19 @@ func (h *Handler) CreatePost(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	postTitle, err := value_object.NewPostTitle(req.Title)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	postContent, err := value_object.NewPostContent(req.Content)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	postData := domain.Post{
-		Title:   req.Title,
-		Content: req.Content,
+		Title:   postTitle,
+		Content: postContent,
 	}
 
 	post, err := h.Service.CreatePost(c.Context(), postData)
@@ -131,8 +142,8 @@ func (h *Handler) CreatePost(c *fiber.Ctx) error {
 
 	return c.JSON(PostResponse{
 		ID:        post.Id,
-		Title:     post.Title,
-		Content:   post.Content,
+		Title:     post.Title.Value,
+		Content:   post.Content.Value,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		DeletedAt: post.DeletedAt,
@@ -166,9 +177,19 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	postTitle, err := value_object.NewPostTitle(req.Title)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	postContent, err := value_object.NewPostContent(req.Content)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	post, err = h.Service.UpdatePost(c.Context(), domain.Post{
-		Title:   req.Title,
-		Content: req.Content,
+		Title:   postTitle,
+		Content: postContent,
 	})
 
 	if errors.Is(err, gorm.ErrDuplicatedKey) {
@@ -179,8 +200,8 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 
 	return c.JSON(PostResponse{
 		ID:        post.Id,
-		Title:     post.Title,
-		Content:   post.Content,
+		Title:     post.Title.Value,
+		Content:   post.Content.Value,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		DeletedAt: post.DeletedAt,

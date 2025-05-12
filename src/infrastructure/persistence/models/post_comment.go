@@ -2,13 +2,14 @@ package models
 
 import (
 	"DDD/src/domain"
+	"DDD/src/domain/value_object"
 	"gorm.io/gorm"
 )
 
 type PostCommentTable struct {
 	gorm.Model
 	PostId uint   `gorm:"index;not null"`
-	Text   string `gorm:"type:text;not null" validate:"required,min=3,max=100"`
+	Text   string `gorm:"type:text;not null"`
 }
 
 func (PostCommentTable) TableName() string {
@@ -16,9 +17,15 @@ func (PostCommentTable) TableName() string {
 }
 
 func ToDomainPostComment(p PostCommentTable) domain.PostComment {
+
+	postCommentText, err := value_object.NewPostCommentText(p.Text)
+	if err != nil {
+		panic(err)
+	}
+
 	domainComment := domain.PostComment{
 		Id:        p.ID,
-		Text:      p.Text,
+		Text:      postCommentText,
 		PostId:    p.PostId,
 		CreatedAt: p.CreatedAt,
 		UpdatedAt: p.UpdatedAt,
@@ -41,7 +48,7 @@ func FromPostCommentDomain(p domain.PostComment) PostCommentTable {
 			UpdatedAt: p.UpdatedAt,
 		},
 		PostId: p.PostId,
-		Text:   p.Text,
+		Text:   p.Text.Value,
 	}
 
 	if p.DeletedAt != nil {

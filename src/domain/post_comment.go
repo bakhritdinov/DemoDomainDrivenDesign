@@ -1,17 +1,18 @@
 package domain
 
 import (
+	"DDD/src/domain/value_object"
 	"context"
 	"time"
 )
 
 type PostComment struct {
-	Id        uint
-	PostId    uint
-	Text      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+	Id        uint                         `json:"id"`
+	PostId    uint                         `json:"postId"`
+	Text      value_object.PostCommentText `json:"text"`
+	CreatedAt time.Time                    `json:"createdAt"`
+	UpdatedAt time.Time                    `json:"updatedAt"`
+	DeletedAt *time.Time                   `json:"deletedAt"`
 }
 
 type PostCommentRepository interface {

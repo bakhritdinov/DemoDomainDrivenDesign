@@ -6,7 +6,6 @@ import (
 	"DDD/src/infrastructure/http/v1/comment"
 	"DDD/src/infrastructure/http/v1/post"
 	"DDD/src/infrastructure/persistence"
-	"DDD/src/infrastructure/persistence/validators"
 	"DDD/src/infrastructure/repository"
 	"fmt"
 	"github.com/gofiber/contrib/swagger"
@@ -49,10 +48,6 @@ func main() {
 
 	// Health check
 	app.Use(healthcheck.New())
-
-	// Validators
-	validators.InitValidator("en")
-	validators.RegisterValidationCallbacks(db)
 
 	// Services
 	postService := &appPost.PostService{

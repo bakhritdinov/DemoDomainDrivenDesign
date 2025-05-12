@@ -2,13 +2,14 @@ package models
 
 import (
 	"DDD/src/domain"
+	"DDD/src/domain/value_object"
 	"gorm.io/gorm"
 )
 
 type PostTable struct {
 	gorm.Model
-	Title    string             `gorm:"size:255;not null" validate:"required,min=3,max=100"`
-	Content  string             `gorm:"type:text" validate:"required,max=500"`
+	Title    string             `gorm:"size:255;not null"`
+	Content  string             `gorm:"type:text"`
 	Comments []PostCommentTable `gorm:"foreignKey:PostId;constraint:OnDelete:CASCADE"`
 }
 
@@ -20,9 +21,14 @@ func ToDomainPost(p PostTable) domain.Post {
 	comments := make([]domain.PostComment, len(p.Comments))
 
 	for i, comment := range p.Comments {
+		postCommentText, err := value_object.NewPostCommentText(comment.Text)
+		if err != nil {
+			panic(err)
+		}
+
 		domainComment := domain.PostComment{
 			Id:        comment.ID,
-			Text:      comment.Text,
+			Text:      postCommentText,
 			PostId:    p.ID,
 			CreatedAt: comment.CreatedAt,
 			UpdatedAt: comment.UpdatedAt,
@@ -37,10 +43,20 @@ func ToDomainPost(p PostTable) domain.Post {
 		comments[i] = domainComment
 	}
 
+	postTitle, err := value_object.NewPostTitle(p.Title)
+	if err != nil {
+		panic(err)
+	}
+
+	postContent, err := value_object.NewPostContent(p.Content)
+	if err != nil {
+		panic(err)
+	}
+
 	domainPost := domain.Post{
 		Id:        p.ID,
-		Title:     p.Title,
-		Content:   p.Content,
+		Title:     postTitle,
+		Content:   postContent,
 		Comments:  comments,
 		CreatedAt: p.CreatedAt,
 		UpdatedAt: p.UpdatedAt,
@@ -65,7 +81,7 @@ func FromPostDomain(p domain.Post) PostTable {
 				CreatedAt: comment.CreatedAt,
 				UpdatedAt: comment.UpdatedAt,
 			},
-			Text:   comment.Text,
+			Text:   comment.Text.Value,
 			PostId: p.Id,
 		}
 
@@ -84,8 +100,8 @@ func FromPostDomain(p domain.Post) PostTable {
 			CreatedAt: p.CreatedAt,
 			UpdatedAt: p.UpdatedAt,
 		},
-		Title:    p.Title,
-		Content:  p.Content,
+		Title:    p.Title.Value,
+		Content:  p.Content.Value,
 		Comments: comments,
 	}
 

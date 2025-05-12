@@ -1,18 +1,19 @@
 package domain
 
 import (
+	"DDD/src/domain/value_object"
 	"context"
 	"time"
 )
 
 type Post struct {
-	Id        uint
-	Title     string
-	Content   string
-	Comments  []PostComment `json:"-"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+	Id        uint                     `json:"id"`
+	Title     value_object.PostTitle   `json:"title"`
+	Content   value_object.PostContent `json:"content"`
+	Comments  []PostComment            `json:"-"`
+	CreatedAt time.Time                `json:"createdAt"`
+	UpdatedAt time.Time                `json:"updatedAt"`
+	DeletedAt *time.Time               `json:"deletedAt"`
 }
 
 type PostRepository interface {

@@ -3,6 +3,7 @@ package httpCommentV1
 import (
 	applicationComment "DDD/src/application/post_comment"
 	"DDD/src/domain"
+	"DDD/src/domain/value_object"
 	"DDD/src/infrastructure/http"
 	"errors"
 	"fmt"
@@ -55,7 +56,7 @@ func (h *Handler) FindComment(c *fiber.Ctx) error {
 
 	return c.JSON(PostCommentResponse{
 		ID:        comment.Id,
-		Text:      comment.Text,
+		Text:      comment.Text.Value,
 		PostId:    comment.PostId,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,
@@ -121,8 +122,13 @@ func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	postCommentText, err := value_object.NewPostCommentText(req.Text)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	comment, err := h.Service.CreatePostComment(c.Context(), domain.PostComment{
-		Text:   req.Text,
+		Text:   postCommentText,
 		PostId: uint(postId),
 	})
 
@@ -132,7 +138,7 @@ func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 
 	return c.JSON(PostCommentResponse{
 		ID:        comment.Id,
-		Text:      comment.Text,
+		Text:      comment.Text.Value,
 		PostId:    comment.PostId,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,

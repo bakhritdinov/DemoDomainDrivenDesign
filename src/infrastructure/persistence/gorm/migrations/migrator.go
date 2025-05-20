@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"DDD/src/infrastructure/persistence/models"
+	"DDD/src/domain"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +15,7 @@ func NewGormMigrator(db *gorm.DB) *GormMigrator {
 
 func (m *GormMigrator) Run() error {
 	return m.db.AutoMigrate(
-		&models.PostTable{},
-		&models.PostCommentTable{},
+		&domain.Post{},
+		&domain.PostComment{},
 	)
 }

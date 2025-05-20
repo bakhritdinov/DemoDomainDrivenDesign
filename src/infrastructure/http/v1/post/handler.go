@@ -46,7 +46,7 @@ type Handler struct {
 // @Param id path int true "post id"
 // @Success 201 {object} PostResponse
 // @Failure 400 {string} error
-// @Router /v1/posts/{id} [get]
+// @Router /api/v1/posts/{id} [get]
 func (h *Handler) FindPost(c *fiber.Ctx) error {
 	postID, err := c.ParamsInt("id")
 	if err != nil {
@@ -62,8 +62,8 @@ func (h *Handler) FindPost(c *fiber.Ctx) error {
 
 	return c.JSON(PostResponse{
 		ID:        post.Id,
-		Title:     post.Title.Value,
-		Content:   post.Content.Value,
+		Title:     post.Title.String(),
+		Content:   post.Content.String(),
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		DeletedAt: post.DeletedAt,
@@ -80,7 +80,7 @@ func (h *Handler) FindPost(c *fiber.Ctx) error {
 // @Param per_page query int false "per page number" default(10)
 // @Success 200 {object} http.PaginateResponse[domain.Post]
 // @Failure 400 {string} error
-// @Router /v1/posts [get]
+// @Router /api/v1/posts [get]
 func (h *Handler) Paginate(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
@@ -110,19 +110,19 @@ func (h *Handler) Paginate(c *fiber.Ctx) error {
 // @Param request body CreatePostRequest true "Post data to create"
 // @Success 201 {object} PostResponse
 // @Failure 400 {string} error
-// @Router /v1/posts [post]
+// @Router /api/v1/posts [post]
 func (h *Handler) CreatePost(c *fiber.Ctx) error {
 	req := CreatePostRequest{}
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	postTitle, err := value_object.NewPostTitle(req.Title)
+	postTitle, err := value_object.NewTitle(req.Title)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	postContent, err := value_object.NewPostContent(req.Content)
+	postContent, err := value_object.NewContent(req.Content)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -142,8 +142,8 @@ func (h *Handler) CreatePost(c *fiber.Ctx) error {
 
 	return c.JSON(PostResponse{
 		ID:        post.Id,
-		Title:     post.Title.Value,
-		Content:   post.Content.Value,
+		Title:     post.Title.String(),
+		Content:   post.Content.String(),
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		DeletedAt: post.DeletedAt,
@@ -159,7 +159,7 @@ func (h *Handler) CreatePost(c *fiber.Ctx) error {
 // @Param request body UpdatePostRequest true "Post data to update"
 // @Success 200 {object} PostResponse
 // @Failure 400 {string} error
-// @Router /v1/posts/{id} [patch]
+// @Router /api/v1/posts/{id} [patch]
 func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 	postID, err := c.ParamsInt("id")
 	if err != nil {
@@ -177,20 +177,25 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	postTitle, err := value_object.NewPostTitle(req.Title)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	if req.Title != "" {
+		postTitle, err := value_object.NewTitle(req.Title)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		post.Title = postTitle
 	}
 
-	postContent, err := value_object.NewPostContent(req.Content)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	if req.Content != "" {
+		postContent, err := value_object.NewContent(req.Content)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		post.Content = postContent
 	}
 
-	post, err = h.Service.UpdatePost(c.Context(), domain.Post{
-		Title:   postTitle,
-		Content: postContent,
-	})
+	post, err = h.Service.UpdatePost(c.Context(), *post)
 
 	if errors.Is(err, gorm.ErrDuplicatedKey) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "You can't update a post with the same title."})
@@ -200,8 +205,8 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 
 	return c.JSON(PostResponse{
 		ID:        post.Id,
-		Title:     post.Title.Value,
-		Content:   post.Content.Value,
+		Title:     post.Title.String(),
+		Content:   post.Content.String(),
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		DeletedAt: post.DeletedAt,
@@ -217,7 +222,7 @@ func (h *Handler) UpdatePost(c *fiber.Ctx) error {
 // @Param id path int true "Post ID"
 // @Success 204 "No Content - Successful deletion"
 // @Failure 400 {string} error
-// @Router /v1/posts/{id} [delete]
+// @Router /api/v1/posts/{id} [delete]
 func (h *Handler) DeletePost(c *fiber.Ctx) error {
 	postID, err := c.ParamsInt("id")
 	if err != nil {

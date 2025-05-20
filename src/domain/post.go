@@ -7,13 +7,13 @@ import (
 )
 
 type Post struct {
-	Id        uint                     `json:"id"`
-	Title     value_object.PostTitle   `json:"title"`
-	Content   value_object.PostContent `json:"content"`
-	Comments  []PostComment            `json:"-"`
-	CreatedAt time.Time                `json:"createdAt"`
-	UpdatedAt time.Time                `json:"updatedAt"`
-	DeletedAt *time.Time               `json:"deletedAt"`
+	Id        uint                 `gorm:"primarykey" json:"id"`
+	Title     value_object.Title   `gorm:"size:255;not null" json:"title"`
+	Content   value_object.Content `gorm:"type:text" json:"content"`
+	Comments  []PostComment        `gorm:"foreignKey:PostId;constraint:OnDelete:CASCADE" json:"-"`
+	CreatedAt time.Time            `json:"createdAt"`
+	UpdatedAt time.Time            `json:"updatedAt"`
+	DeletedAt *time.Time           `gorm:"index" json:"deletedAt"`
 }
 
 type PostRepository interface {

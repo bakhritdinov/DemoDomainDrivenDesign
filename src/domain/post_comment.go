@@ -7,12 +7,12 @@ import (
 )
 
 type PostComment struct {
-	Id        uint                         `json:"id"`
-	PostId    uint                         `json:"postId"`
-	Text      value_object.PostCommentText `json:"text"`
-	CreatedAt time.Time                    `json:"createdAt"`
-	UpdatedAt time.Time                    `json:"updatedAt"`
-	DeletedAt *time.Time                   `json:"deletedAt"`
+	Id        uint              `gorm:"primarykey" json:"id"`
+	PostId    uint              `gorm:"index;not null" json:"postId"`
+	Text      value_object.Text `gorm:"type:text;not null" json:"text"`
+	CreatedAt time.Time         `json:"createdAt"`
+	UpdatedAt time.Time         `json:"updatedAt"`
+	DeletedAt *time.Time        `gorm:"index" json:"deletedAt"`
 }
 
 type PostCommentRepository interface {

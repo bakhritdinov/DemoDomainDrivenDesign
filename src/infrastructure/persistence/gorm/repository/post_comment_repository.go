@@ -2,7 +2,6 @@ package repository
 
 import (
 	"DDD/src/domain"
-	"DDD/src/infrastructure/persistence/models"
 	"context"
 	"errors"
 	"gorm.io/gorm"
@@ -17,39 +16,34 @@ func NewCommentRepository(db *gorm.DB) domain.PostCommentRepository {
 }
 
 func (r *CommentRepository) FindById(ctx context.Context, id int) (*domain.PostComment, error) {
-	var commentTable models.PostCommentTable
+	var comment domain.PostComment
 	err := r.db.WithContext(ctx).
-		First(&commentTable, id).Error
+		First(&comment, id).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
-	comment := models.ToDomainPostComment(commentTable)
-
 	return &comment, err
 }
 
 func (r *CommentRepository) FindByPostId(ctx context.Context, postID int) ([]domain.PostComment, error) {
-	var comments []models.PostCommentTable
+	var comments []domain.PostComment
 	err := r.db.WithContext(ctx).
 		Where("post_id = ?", postID).
 		Find(&comments).Error
 
 	domainComments := make([]domain.PostComment, len(comments))
-	for i, c := range comments {
-		domainComments[i] = models.ToDomainPostComment(c)
-	}
 
 	return domainComments, err
 }
 
 func (r *CommentRepository) Paginate(ctx context.Context, postId int, page int, perPage int) ([]domain.PostComment, int64, error) {
-	var comments []models.PostCommentTable
+	var comments []domain.PostComment
 	var total int64
 
 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&models.PostCommentTable{}).Where("post_id = ?", postId).Count(&total).Error; err != nil {
+		if err := tx.Model(&domain.PostComment{}).Where("post_id = ?", postId).Count(&total).Error; err != nil {
 			return err
 		}
 
@@ -62,23 +56,15 @@ func (r *CommentRepository) Paginate(ctx context.Context, postId int, page int, 
 			Find(&comments).Error
 	})
 
-	domainComments := make([]domain.PostComment, len(comments))
-	for i, c := range comments {
-		domainComments[i] = models.ToDomainPostComment(c)
-	}
-
-	return domainComments, total, err
+	return comments, total, err
 }
 
 func (r *CommentRepository) Create(ctx context.Context, comment *domain.PostComment) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		commentTable := models.FromPostCommentDomain(*comment)
-
-		if err := r.db.WithContext(ctx).Create(&commentTable).Error; err != nil {
+		if err := r.db.WithContext(ctx).Create(&comment).Error; err != nil {
 			return err
 		}
 
-		*comment = models.ToDomainPostComment(commentTable) // update domain model
 		return nil
 	})
 }

@@ -40,7 +40,7 @@ type Handler struct {
 // @Param id path int true "post comment id"
 // @Success 201 {object} PostCommentResponse
 // @Failure 400 {string} error
-// @Router /v1/comments/{id} [get]
+// @Router /api/v1/comments/{id} [get]
 func (h *Handler) FindComment(c *fiber.Ctx) error {
 	commentId, err := c.ParamsInt("id")
 	if err != nil {
@@ -56,7 +56,7 @@ func (h *Handler) FindComment(c *fiber.Ctx) error {
 
 	return c.JSON(PostCommentResponse{
 		ID:        comment.Id,
-		Text:      comment.Text.Value,
+		Text:      comment.Text.String(),
 		PostId:    comment.PostId,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,
@@ -75,7 +75,7 @@ func (h *Handler) FindComment(c *fiber.Ctx) error {
 // @Param per_page query int false "per page number" default(10)
 // @Success 200 {object} http.PaginateResponse[domain.PostComment]
 // @Failure 400 {string} error
-// @Router /v1/posts/{postId}/comments [get]
+// @Router /api/v1/posts/{postId}/comments [get]
 func (h *Handler) Paginate(c *fiber.Ctx) error {
 	page, _ := strconv.Atoi(c.Query("page", "1"))
 	perPage, _ := strconv.Atoi(c.Query("per_page", "10"))
@@ -110,7 +110,7 @@ func (h *Handler) Paginate(c *fiber.Ctx) error {
 // @Param request body CreatePostCommentRequest true "Post comment data to create"
 // @Success 201 {object} PostCommentResponse
 // @Failure 400 {string} error
-// @Router /v1/posts/{postId}/comments [post]
+// @Router /api/v1/posts/{postId}/comments [post]
 func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 	postId, err := c.ParamsInt("postId")
 	if err != nil {
@@ -122,7 +122,7 @@ func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	postCommentText, err := value_object.NewPostCommentText(req.Text)
+	postCommentText, err := value_object.NewText(req.Text)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -138,7 +138,7 @@ func (h *Handler) CreatePostComment(c *fiber.Ctx) error {
 
 	return c.JSON(PostCommentResponse{
 		ID:        comment.Id,
-		Text:      comment.Text.Value,
+		Text:      comment.Text.String(),
 		PostId:    comment.PostId,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,

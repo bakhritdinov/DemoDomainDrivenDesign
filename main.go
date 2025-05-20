@@ -5,8 +5,8 @@ import (
 	appComment "DDD/src/application/post_comment"
 	"DDD/src/infrastructure/http/v1/comment"
 	"DDD/src/infrastructure/http/v1/post"
-	"DDD/src/infrastructure/persistence"
-	"DDD/src/infrastructure/repository"
+	"DDD/src/infrastructure/persistence/gorm"
+	"DDD/src/infrastructure/persistence/gorm/repository"
 	"fmt"
 	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
@@ -21,8 +21,7 @@ import (
 
 // @title Fiber Swagger
 // @version 1.0
-// @description Demo Domain driven design project.
-// @BasePath /api
+// @description Demo Domain Driven design project.
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -33,7 +32,7 @@ func main() {
 		AppName: os.Getenv("APP_NAME"),
 	})
 
-	db, err := persistence.NewGormConnection(os.Getenv("DB_CONNECTION"))
+	db, err := gorm.NewGormConnection(os.Getenv("DB_CONNECTION"))
 	if err != nil {
 		panic(err)
 	}
